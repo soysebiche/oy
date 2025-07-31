@@ -1,8 +1,8 @@
-# Interactive Analysis of Disconnected Youth (Opportunity Youth) in U.S. Metro Areas
+# Interactive Analysis of Opportunity Youth in U.S. Metro Areas
 
 ## Project Overview
 
-This project aims to create an interactive data visualization to analyze the number and percentage of **Disconnected Youth (Opportunity Youth - OY)** in major U.S. metropolitan areas. The visualization will focus on data from 2022 and 2023, allowing for temporal comparison.
+This project aims to create an interactive data visualization to analyze the number and percentage of **Opportunity Youth (OY)** in major U.S. metropolitan areas. The visualization will focus on data from 2022 and 2023, allowing for temporal comparison.
 
 This project is inspired by the functionality and design of the [Measure of America](https://www.measureofamerica.org/DYInteractive/) visualizer, specifically replicating its "BY METRO AREA" section.
 
