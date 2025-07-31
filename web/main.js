@@ -13,10 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let selectedYear = 2023; // Default year
     let geojsonLayer;
-    let detailedData;
-    let geojsonData;
+    let detailedData; // Stores detailed data for all metros
+    let geojsonData; // Stores geojson data for all metros
     let currentSelectedGeoID = null; // To track the currently selected metro area
     let nationalSummary = {}; // To store calculated national totals
+
+    // Filter states
+    let selectedGender = 'all';
+    let selectedRace = 'all';
 
     // 2. Define Data Paths
     // -------------------------------------------------------------------
@@ -54,10 +58,44 @@ document.addEventListener('DOMContentLoaded', () => {
     // New function to calculate national summary
     function calculateNationalSummary() {
         nationalSummary = {
-            '2022': { total_youth_pop: 0, total_oy: 0, oy_percentage: 0 },
-            '2023': { total_youth_pop: 0, total_oy: 0, oy_percentage: 0 }
+            '2022': { total_youth_pop: 0, total_oy: 0, oy_percentage: 0, detailed: [] },
+            '2023': { total_youth_pop: 0, total_oy: 0, oy_percentage: 0, detailed: [] }
         };
 
+        // Aggregate detailed data for national totals
+        const nationalDetailed = {};
+
+        for (const geoId in detailedData) {
+            detailedData[geoId].forEach(row => {
+                const key = `${row.race_ethnicity}_${row.gender}`;
+                if (!nationalDetailed[key]) {
+                    nationalDetailed[key] = {
+                        race_ethnicity: row.race_ethnicity,
+                        gender: row.gender,
+                        youth_population_2022: 0,
+                        youth_population_2023: 0,
+                        total_opportunity_youth_2022: 0,
+                        total_opportunity_youth_2023: 0,
+                        opp_youth_percent_2022: 0,
+                        opp_youth_percent_2023: 0
+                    };
+                }
+                nationalDetailed[key].youth_population_2022 += row.youth_population_2022 || 0;
+                nationalDetailed[key].youth_population_2023 += row.youth_population_2023 || 0;
+                nationalDetailed[key].total_opportunity_youth_2022 += row.total_opportunity_youth_2022 || 0;
+                nationalDetailed[key].total_opportunity_youth_2023 += row.total_opportunity_youth_2023 || 0;
+            });
+        }
+
+        // Calculate percentages for national detailed
+        for (const key in nationalDetailed) {
+            const row = nationalDetailed[key];
+            row.opp_youth_percent_2022 = row.youth_population_2022 > 0 ? ((row.total_opportunity_youth_2022 / row.youth_population_2022) * 100).toFixed(1) : 'N/A';
+            row.opp_youth_percent_2023 = row.youth_population_2023 > 0 ? ((row.total_opportunity_youth_2023 / row.youth_population_2023) * 100).toFixed(1) : 'N/A';
+            nationalSummary.detailed.push(row);
+        }
+
+        // Calculate overall national totals (for info panel)
         geojsonData.features.forEach(feature => {
             const props = feature.properties;
             if (props.total_youth_pop_2022) {
@@ -126,18 +164,31 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateDataTable(geoId) {
         const tableBody = document.getElementById('data-table-body');
         const tableFooter = document.getElementById('data-table-footer');
-        const data = detailedData[geoId];
+        let dataToDisplay = [];
+
+        if (geoId === 'national') {
+            dataToDisplay = nationalSummary.detailed;
+        } else {
+            dataToDisplay = detailedData[geoId];
+        }
+
+        // Apply filters
+        dataToDisplay = dataToDisplay.filter(row => {
+            const genderMatch = selectedGender === 'all' || row.gender === selectedGender;
+            const raceMatch = selectedRace === 'all' || row.race_ethnicity === selectedRace;
+            return genderMatch && raceMatch;
+        });
 
         tableBody.innerHTML = '';
         tableFooter.innerHTML = '';
 
-        if (data) {
+        if (dataToDisplay && dataToDisplay.length > 0) {
             let totalOY2022 = 0;
             let totalOY2023 = 0;
             let totalPop2022 = 0;
             let totalPop2023 = 0;
 
-            data.forEach(row => {
+            dataToDisplay.forEach(row => {
                 const oy2022 = row.total_opportunity_youth_2022 || 0;
                 const oy2023 = row.total_opportunity_youth_2023 || 0;
                 const pop2022 = row.youth_population_2022 || 0;
@@ -189,13 +240,13 @@ document.addEventListener('DOMContentLoaded', () => {
             tableFooter.innerHTML = footerRow;
 
         } else {
-            tableBody.innerHTML = '<tr><td colspan="8">No detailed data available for this area.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8">No detailed data available for this selection.</td></tr>';
         }
     }
 
     // New function to display national totals
     function displayNationalTotals() {
-        currentSelectedGeoID = null; // No metro area is selected
+        currentSelectedGeoID = 'national'; // Indicate national totals are displayed
 
         // Update Info Panel for National Totals
         const infoPanel = document.getElementById('info-panel');
@@ -208,30 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         // Update Data Table for National Totals
-        const tableBody = document.getElementById('data-table-body');
-        const tableFooter = document.getElementById('data-table-footer');
-        tableBody.innerHTML = '';
-        tableFooter.innerHTML = '';
-
-        const totalOY2022 = nationalSummary['2022'].total_oy;
-        const totalOY2023 = nationalSummary['2023'].total_oy;
-        const totalPercent2022 = nationalSummary['2022'].oy_percentage;
-        const totalPercent2023 = nationalSummary['2023'].oy_percentage;
-        const totalChange = (parseFloat(totalPercent2023) - parseFloat(totalPercent2022)).toFixed(1);
-        const totalChangeHtml = `<td>${totalPercent2022 === 'N/A' || totalPercent2023 === 'N/A' ? 'N/A' : (totalChange > 0 ? '▲' : '▼') + ` ${Math.abs(totalChange)}%`}</td>`;
-
-        const footerRow = `
-            <tr>
-                <td colspan="2">National Total</td>
-                <td>${totalPercent2022}%</td>
-                <td>${totalPercent2023}%</td>
-                <td>${totalOY2022.toLocaleString()}</td>
-                <td>${totalOY2023.toLocaleString()}</td>
-                <td>${(totalOY2022 + totalOY2023).toLocaleString()}</td>
-                ${totalChangeHtml}
-            </tr>
-        `;
-        tableFooter.innerHTML = footerRow;
+        updateDataTable('national');
     }
 
     // 7. Event Listeners for Year Filter and Clear Selection
@@ -241,10 +269,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('btn-2022').classList.add('active');
         document.getElementById('btn-2023').classList.remove('active');
         drawMap();
-        if (currentSelectedGeoID) {
+        if (currentSelectedGeoID && currentSelectedGeoID !== 'national') {
             const selectedFeature = geojsonData.features.find(f => f.properties.GEOID === currentSelectedGeoID);
             if (selectedFeature) {
                 updateInfoPanel(selectedFeature.properties);
+                updateDataTable(selectedFeature.properties.GEOID);
             }
         } else {
             displayNationalTotals();
@@ -256,10 +285,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('btn-2023').classList.add('active');
         document.getElementById('btn-2022').classList.remove('active');
         drawMap();
-        if (currentSelectedGeoID) {
+        if (currentSelectedGeoID && currentSelectedGeoID !== 'national') {
             const selectedFeature = geojsonData.features.find(f => f.properties.GEOID === currentSelectedGeoID);
             if (selectedFeature) {
                 updateInfoPanel(selectedFeature.properties);
+                updateDataTable(selectedFeature.properties.GEOID);
             }
         } else {
             displayNationalTotals();
@@ -270,5 +300,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('clear-selection-btn').addEventListener('click', () => {
         displayNationalTotals();
         map.setView([39.8283, -98.5795], 4); // Reset map view
+    });
+
+    // Event listeners for filter dropdowns
+    document.getElementById('gender-filter').addEventListener('change', (event) => {
+        selectedGender = event.target.value;
+        if (currentSelectedGeoID) {
+            updateDataTable(currentSelectedGeoID);
+        }
+    });
+
+    document.getElementById('race-filter').addEventListener('change', (event) => {
+        selectedRace = event.target.value;
+        if (currentSelectedGeoID) {
+            updateDataTable(currentSelectedGeoID);
+        }
     });
 });

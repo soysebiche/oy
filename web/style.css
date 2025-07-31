@@ -94,6 +94,38 @@ h1 {
     color: #2980b9;
 }
 
+/* Table Filters Styling */
+#table-filters {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
+#table-filters label {
+    margin-right: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+#table-filters select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-right: 20px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+#table-filters select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
 /* Table Styling */
 #table-container {
     margin-top: 20px;
