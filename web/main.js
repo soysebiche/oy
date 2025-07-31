@@ -183,8 +183,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${row.gender}</td>
                         <td>${oy2022.toLocaleString()}</td>
                         <td>${p2022}%</td>
+                        <td>${pop2022.toLocaleString()}</td>
                         <td>${oy2023.toLocaleString()}</td>
                         <td>${p2023}%</td>
+                        <td>${pop2023.toLocaleString()}</td>
                         <td>${(oy2022 + oy2023).toLocaleString()}</td>
                         ${changeHtml}
                     </tr>
@@ -204,8 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td colspan="2">Total</td>
                     <td>${totalOY2022.toLocaleString()}</td>
                     <td>${totalPercent2022}%</td>
+                    <td>${totalPop2022.toLocaleString()}</td>
                     <td>${totalOY2023.toLocaleString()}</td>
                     <td>${totalPercent2023}%</td>
+                    <td>${totalPop2023.toLocaleString()}</td>
                     <td>${(totalOY2022 + totalOY2023).toLocaleString()}</td>
                     ${totalChangeHtml}
                 </tr>
@@ -213,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tableFooter.innerHTML = footerRow;
 
         } else {
-            tableBody.innerHTML = '<tr><td colspan="8">No detailed data available for this selection.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="10">No detailed data available for this selection.</td></tr>';
         }
     }
 
