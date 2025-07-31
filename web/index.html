@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opportunity Youth in U.S. Metro Areas</title>
+
+    <!-- Leaflet CSS for the map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Opportunity Youth in U.S. Metro Areas</h1>
+            <p>Interactive map showing the percentage of disconnected youth (ages 16-24) by metropolitan area.</p>
+        </header>
+
+        <div id="controls">
+            <div id="year-filter">
+                <button id="btn-2022" class="year-btn">2022</button>
+                <button id="btn-2023" class="year-btn active">2023</button>
+            </div>
+        </div>
+
+        <div id="map"></div>
+
+        <div id="info-panel">
+            <h2>Select a Metro Area</h2>
+            <p>Click on a metro area on the map to see detailed information.</p>
+        </div>
+
+        <div id="table-container">
+            <h3>Detailed Breakdown</h3>
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2">Race/Ethnicity</th>
+                        <th rowspan="2">Gender</th>
+                        <th colspan="2">Opportunity Youth (%)</th>
+                        <th colspan="2">Opportunity Youth (#)</th>
+                        <th rowspan="2">Change (% pts)</th>
+                    </tr>
+                    <tr>
+                        <th>2022</th>
+                        <th>2023</th>
+                        <th>2022</th>
+                        <th>2023</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- D3.js for data handling -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Custom main script -->
+    <script src="main.js"></script>
+
+</body>
+</html>

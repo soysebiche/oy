@@ -1,0 +1,10 @@
+# Vercel
+.vercel/
+
+# IPUMS Data Files
+*.dat.gz
+
+# R-specific files
+.Rhistory
+.RData
+.Rproj.user
