@@ -30,13 +30,13 @@ h1 {
 /* Controls and Filters */
 #controls {
     display: flex;
-    justify-content: space-between; /* Pushes items to ends */
+    justify-content: center; /* Centers items horizontally */
     align-items: center;   /* Aligns items vertically */
     margin-bottom: 20px;
 }
 
 #year-buttons-container {
-    flex-grow: 1; /* Allows this container to take available space */
+    /* flex-grow: 1;  No longer needed as clear-btn is gone */
     text-align: center; /* Centers its content */
 }
 
@@ -60,22 +60,6 @@ h1 {
     background-color: #3498db;
     color: #fff;
     border-color: #3498db;
-}
-
-.clear-btn {
-    padding: 10px 20px;
-    border: 1px solid #ccc;
-    background-color: #f8f8f8;
-    color: #333;
-    cursor: pointer;
-    font-size: 16px;
-    margin-left: 20px; /* Space from year buttons */
-    border-radius: 5px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.clear-btn:hover {
-    background-color: #e0e0e0;
 }
 
 /* Map Styling */

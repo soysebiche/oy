@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDataTable('national');
     }
 
-    // 7. Event Listeners for Year Filter and Clear Selection
+    // 7. Event Listeners for Year Filter
     // -------------------------------------------------------------------
     document.getElementById('btn-2022').addEventListener('click', () => {
         selectedYear = 2022;
@@ -287,12 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             displayNationalTotals();
         }
-    });
-
-    // Event listener for the new Clear Selection button
-    document.getElementById('clear-selection-btn').addEventListener('click', () => {
-        displayNationalTotals();
-        map.setView([39.8283, -98.5795], 4); // Reset map view
     });
 
     // Event listeners for filter dropdowns
