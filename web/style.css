@@ -55,6 +55,22 @@ h1 {
     border-color: #3498db;
 }
 
+.clear-btn {
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+    color: #333;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 20px; /* Space from year buttons */
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.clear-btn:hover {
+    background-color: #e0e0e0;
+}
+
 /* Map Styling */
 #map {
     height: 550px;

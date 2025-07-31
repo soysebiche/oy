@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let geojsonLayer;
     let detailedData;
     let geojsonData;
+    let currentSelectedGeoID = null; // To track the currently selected metro area
+    let nationalSummary = {}; // To store calculated national totals
 
     // 2. Define Data Paths
     // -------------------------------------------------------------------
@@ -41,8 +43,38 @@ document.addEventListener('DOMContentLoaded', () => {
     ]).then(([geojson, detailed]) => {
         geojsonData = geojson;
         detailedData = detailed;
+
+        calculateNationalSummary(); // Calculate national totals once data is loaded
+        
         drawMap(); // Initial map draw for the default year
+        displayNationalTotals(); // Show national totals initially
+
     }).catch(error => console.error('Error loading data:', error));
+
+    // New function to calculate national summary
+    function calculateNationalSummary() {
+        nationalSummary = {
+            '2022': { total_youth_pop: 0, total_oy: 0, oy_percentage: 0 },
+            '2023': { total_youth_pop: 0, total_oy: 0, oy_percentage: 0 }
+        };
+
+        geojsonData.features.forEach(feature => {
+            const props = feature.properties;
+            if (props.total_youth_pop_2022) {
+                nationalSummary['2022'].total_youth_pop += props.total_youth_pop_2022;
+                nationalSummary['2022'].total_oy += props.total_oy_2022;
+            }
+            if (props.total_youth_pop_2023) {
+                nationalSummary['2023'].total_youth_pop += props.total_youth_pop_2023;
+                nationalSummary['2023'].total_oy += props.total_oy_2023;
+            }
+        });
+
+        nationalSummary['2022'].oy_percentage = nationalSummary['2022'].total_youth_pop > 0 ? 
+            ((nationalSummary['2022'].total_oy / nationalSummary['2022'].total_youth_pop) * 100).toFixed(2) : 'N/A';
+        nationalSummary['2023'].oy_percentage = nationalSummary['2023'].total_youth_pop > 0 ?
+            ((nationalSummary['2023'].total_oy / nationalSummary['2023'].total_youth_pop) * 100).toFixed(2) : 'N/A';
+    }
 
     // 5. Map Drawing and Styling Function
     // -------------------------------------------------------------------
@@ -65,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 layer.bindPopup(`<b>${props.NAME}</b><br>OY Percentage (${selectedYear}): ${percentage}%`);
 
                 layer.on('click', e => {
+                    currentSelectedGeoID = e.target.feature.properties.GEOID; // Set the selected GEOID
                     updateInfoPanel(e.target.feature.properties);
                     updateDataTable(e.target.feature.properties.GEOID);
                     map.fitBounds(e.target.getBounds());
@@ -117,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const p2022 = row.opp_youth_percent_2022 || 'N/A';
                 const p2023 = row.opp_youth_percent_2023 || 'N/A';
-                const change = (p2023 - p2022).toFixed(1);
+                const change = (parseFloat(p2023) - parseFloat(p2022)).toFixed(1);
                 const changeHtml = `<td>${p2022 === 'N/A' || p2023 === 'N/A' ? 'N/A' : (change > 0 ? '▲' : '▼') + ` ${Math.abs(change)}%`}</td>`;
 
                 const tableRow = `
@@ -135,10 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 tableBody.innerHTML += tableRow;
             });
 
-            // Calculate totals
+            // Calculate totals for the footer
             const totalPercent2022 = totalPop2022 > 0 ? ((totalOY2022 / totalPop2022) * 100).toFixed(1) : 'N/A';
             const totalPercent2023 = totalPop2023 > 0 ? ((totalOY2023 / totalPop2023) * 100).toFixed(1) : 'N/A';
-            const totalChange = (totalPercent2023 - totalPercent2022).toFixed(1);
+            const totalChange = (parseFloat(totalPercent2023) - parseFloat(totalPercent2022)).toFixed(1);
             const totalChangeHtml = `<td>${totalPercent2022 === 'N/A' || totalPercent2023 === 'N/A' ? 'N/A' : (totalChange > 0 ? '▲' : '▼') + ` ${Math.abs(totalChange)}%`}</td>`;
 
             // Render footer with totals
@@ -160,13 +193,62 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 7. Event Listeners for Year Filter
+    // New function to display national totals
+    function displayNationalTotals() {
+        currentSelectedGeoID = null; // No metro area is selected
+
+        // Update Info Panel for National Totals
+        const infoPanel = document.getElementById('info-panel');
+        const currentNationalSummary = nationalSummary[selectedYear];
+        infoPanel.innerHTML = `
+            <h2>National Totals (${selectedYear})</h2>
+            <p><strong>Total Youth Population:</strong> ${currentNationalSummary.total_youth_pop.toLocaleString()}</p>
+            <p><strong>Total Opportunity Youth:</strong> ${currentNationalSummary.total_oy.toLocaleString()}</p>
+            <p><strong>Opportunity Youth Percentage:</strong> ${currentNationalSummary.oy_percentage}%</p>
+        `;
+
+        // Update Data Table for National Totals
+        const tableBody = document.getElementById('data-table-body');
+        const tableFooter = document.getElementById('data-table-footer');
+        tableBody.innerHTML = '';
+        tableFooter.innerHTML = '';
+
+        const totalOY2022 = nationalSummary['2022'].total_oy;
+        const totalOY2023 = nationalSummary['2023'].total_oy;
+        const totalPercent2022 = nationalSummary['2022'].oy_percentage;
+        const totalPercent2023 = nationalSummary['2023'].oy_percentage;
+        const totalChange = (parseFloat(totalPercent2023) - parseFloat(totalPercent2022)).toFixed(1);
+        const totalChangeHtml = `<td>${totalPercent2022 === 'N/A' || totalPercent2023 === 'N/A' ? 'N/A' : (totalChange > 0 ? '▲' : '▼') + ` ${Math.abs(totalChange)}%`}</td>`;
+
+        const footerRow = `
+            <tr>
+                <td colspan="2">National Total</td>
+                <td>${totalPercent2022}%</td>
+                <td>${totalPercent2023}%</td>
+                <td>${totalOY2022.toLocaleString()}</td>
+                <td>${totalOY2023.toLocaleString()}</td>
+                <td>${(totalOY2022 + totalOY2023).toLocaleString()}</td>
+                ${totalChangeHtml}
+            </tr>
+        `;
+        tableFooter.innerHTML = footerRow;
+    }
+
+    // 7. Event Listeners for Year Filter and Clear Selection
     // -------------------------------------------------------------------
     document.getElementById('btn-2022').addEventListener('click', () => {
         selectedYear = 2022;
         document.getElementById('btn-2022').classList.add('active');
         document.getElementById('btn-2023').classList.remove('active');
         drawMap();
+        if (currentSelectedGeoID) {
+            const selectedFeature = geojsonData.features.find(f => f.properties.GEOID === currentSelectedGeoID);
+            if (selectedFeature) {
+                updateInfoPanel(selectedFeature.properties);
+            }
+        } else {
+            displayNationalTotals();
+        }
     });
 
     document.getElementById('btn-2023').addEventListener('click', () => {
@@ -174,5 +256,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('btn-2023').classList.add('active');
         document.getElementById('btn-2022').classList.remove('active');
         drawMap();
+        if (currentSelectedGeoID) {
+            const selectedFeature = geojsonData.features.find(f => f.properties.GEOID === currentSelectedGeoID);
+            if (selectedFeature) {
+                updateInfoPanel(selectedFeature.properties);
+            }
+        } else {
+            displayNationalTotals();
+        }
+    });
+
+    // Event listener for the new Clear Selection button
+    document.getElementById('clear-selection-btn').addEventListener('click', () => {
+        displayNationalTotals();
+        map.setView([39.8283, -98.5795], 4); // Reset map view
     });
 });
