@@ -91,33 +91,72 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateDataTable(geoId) {
-        const tableBody = document.querySelector('#data-table tbody');
+        const tableBody = document.getElementById('data-table-body');
+        const tableFooter = document.getElementById('data-table-footer');
         const data = detailedData[geoId];
+
         tableBody.innerHTML = '';
+        tableFooter.innerHTML = '';
 
         if (data) {
+            let totalOY2022 = 0;
+            let totalOY2023 = 0;
+            let totalPop2022 = 0;
+            let totalPop2023 = 0;
+
             data.forEach(row => {
-                const p2022 = row.opp_youth_percent_2022 || 0;
-                const p2023 = row.opp_youth_percent_2023 || 0;
+                const oy2022 = row.total_opportunity_youth_2022 || 0;
+                const oy2023 = row.total_opportunity_youth_2023 || 0;
+                const pop2022 = row.youth_population_2022 || 0;
+                const pop2023 = row.youth_population_2023 || 0;
+
+                totalOY2022 += oy2022;
+                totalOY2023 += oy2023;
+                totalPop2022 += pop2022;
+                totalPop2023 += pop2023;
+
+                const p2022 = row.opp_youth_percent_2022 || 'N/A';
+                const p2023 = row.opp_youth_percent_2023 || 'N/A';
                 const change = (p2023 - p2022).toFixed(1);
-                
-                const changeHtml = `<td>${change > 0 ? '▲' : '▼'} ${change}%</td>`;
+                const changeHtml = `<td>${p2022 === 'N/A' || p2023 === 'N/A' ? 'N/A' : (change > 0 ? '▲' : '▼') + ` ${Math.abs(change)}%`}</td>`;
 
                 const tableRow = `
                     <tr>
                         <td>${row.race_ethnicity}</td>
                         <td>${row.gender}</td>
-                        <td>${row.opp_youth_percent_2022 || 'N/A'}%</td>
-                        <td>${row.opp_youth_percent_2023 || 'N/A'}%</td>
-                        <td>${(row.total_opportunity_youth_2022 || 0).toLocaleString()}</td>
-                        <td>${(row.total_opportunity_youth_2023 || 0).toLocaleString()}</td>
+                        <td>${p2022}%</td>
+                        <td>${p2023}%</td>
+                        <td>${oy2022.toLocaleString()}</td>
+                        <td>${oy2023.toLocaleString()}</td>
+                        <td>${(oy2022 + oy2023).toLocaleString()}</td>
                         ${changeHtml}
                     </tr>
                 `;
                 tableBody.innerHTML += tableRow;
             });
+
+            // Calculate totals
+            const totalPercent2022 = totalPop2022 > 0 ? ((totalOY2022 / totalPop2022) * 100).toFixed(1) : 'N/A';
+            const totalPercent2023 = totalPop2023 > 0 ? ((totalOY2023 / totalPop2023) * 100).toFixed(1) : 'N/A';
+            const totalChange = (totalPercent2023 - totalPercent2022).toFixed(1);
+            const totalChangeHtml = `<td>${totalPercent2022 === 'N/A' || totalPercent2023 === 'N/A' ? 'N/A' : (totalChange > 0 ? '▲' : '▼') + ` ${Math.abs(totalChange)}%`}</td>`;
+
+            // Render footer with totals
+            const footerRow = `
+                <tr>
+                    <td colspan="2">Total</td>
+                    <td>${totalPercent2022}%</td>
+                    <td>${totalPercent2023}%</td>
+                    <td>${totalOY2022.toLocaleString()}</td>
+                    <td>${totalOY2023.toLocaleString()}</td>
+                    <td>${(totalOY2022 + totalOY2023).toLocaleString()}</td>
+                    ${totalChangeHtml}
+                </tr>
+            `;
+            tableFooter.innerHTML = footerRow;
+
         } else {
-            tableBody.innerHTML = '<tr><td colspan="7">No detailed data available for this area.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8">No detailed data available for this area.</td></tr>';
         }
     }
 
