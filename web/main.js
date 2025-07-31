@@ -63,49 +63,42 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // Aggregate detailed data for national totals
-        const nationalDetailed = {};
+        const nationalDetailedAggregated = {};
 
         for (const geoId in detailedData) {
             detailedData[geoId].forEach(row => {
                 const key = `${row.race_ethnicity}_${row.gender}`;
-                if (!nationalDetailed[key]) {
-                    nationalDetailed[key] = {
+                if (!nationalDetailedAggregated[key]) {
+                    nationalDetailedAggregated[key] = {
                         race_ethnicity: row.race_ethnicity,
                         gender: row.gender,
                         youth_population_2022: 0,
                         youth_population_2023: 0,
                         total_opportunity_youth_2022: 0,
-                        total_opportunity_youth_2023: 0,
-                        opp_youth_percent_2022: 0,
-                        opp_youth_percent_2023: 0
+                        total_opportunity_youth_2023: 0
                     };
                 }
-                nationalDetailed[key].youth_population_2022 += row.youth_population_2022 || 0;
-                nationalDetailed[key].youth_population_2023 += row.youth_population_2023 || 0;
-                nationalDetailed[key].total_opportunity_youth_2022 += row.total_opportunity_youth_2022 || 0;
-                nationalDetailed[key].total_opportunity_youth_2023 += row.total_opportunity_youth_2023 || 0;
+                nationalDetailedAggregated[key].youth_population_2022 += row.youth_population_2022 || 0;
+                nationalDetailedAggregated[key].youth_population_2023 += row.youth_population_2023 || 0;
+                nationalDetailedAggregated[key].total_opportunity_youth_2022 += row.total_opportunity_youth_2022 || 0;
+                nationalDetailedAggregated[key].total_opportunity_youth_2023 += row.total_opportunity_youth_2023 || 0;
             });
         }
 
-        // Calculate percentages for national detailed
-        for (const key in nationalDetailed) {
-            const row = nationalDetailed[key];
+        // Calculate percentages for national detailed and push to nationalSummary.detailed
+        for (const key in nationalDetailedAggregated) {
+            const row = nationalDetailedAggregated[key];
             row.opp_youth_percent_2022 = row.youth_population_2022 > 0 ? ((row.total_opportunity_youth_2022 / row.youth_population_2022) * 100).toFixed(1) : 'N/A';
             row.opp_youth_percent_2023 = row.youth_population_2023 > 0 ? ((row.total_opportunity_youth_2023 / row.youth_population_2023) * 100).toFixed(1) : 'N/A';
             nationalSummary.detailed.push(row);
         }
 
-        // Calculate overall national totals (for info panel)
-        geojsonData.features.forEach(feature => {
-            const props = feature.properties;
-            if (props.total_youth_pop_2022) {
-                nationalSummary['2022'].total_youth_pop += props.total_youth_pop_2022;
-                nationalSummary['2022'].total_oy += props.total_oy_2022;
-            }
-            if (props.total_youth_pop_2023) {
-                nationalSummary['2023'].total_youth_pop += props.total_youth_pop_2023;
-                nationalSummary['2023'].total_oy += props.total_oy_2023;
-            }
+        // Calculate overall national totals for info panel from nationalSummary.detailed
+        nationalSummary.detailed.forEach(row => {
+            nationalSummary['2022'].total_youth_pop += row.youth_population_2022 || 0;
+            nationalSummary['2022'].total_oy += row.total_opportunity_youth_2022 || 0;
+            nationalSummary['2023'].total_youth_pop += row.youth_population_2023 || 0;
+            nationalSummary['2023'].total_oy += row.total_opportunity_youth_2023 || 0;
         });
 
         nationalSummary['2022'].oy_percentage = nationalSummary['2022'].total_youth_pop > 0 ? 
@@ -258,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p><strong>Opportunity Youth Percentage:</strong> ${currentNationalSummary.oy_percentage}%</p>
         `;
 
-        // Update Data Table for National Totals
+        // Update Data Table for National Totals (applies filters)
         updateDataTable('national');
     }
 
@@ -305,15 +298,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listeners for filter dropdowns
     document.getElementById('gender-filter').addEventListener('change', (event) => {
         selectedGender = event.target.value;
-        if (currentSelectedGeoID) {
-            updateDataTable(currentSelectedGeoID);
-        }
+        // If a metro is selected, update its table. Otherwise, update national table.
+        updateDataTable(currentSelectedGeoID || 'national');
     });
 
     document.getElementById('race-filter').addEventListener('change', (event) => {
         selectedRace = event.target.value;
-        if (currentSelectedGeoID) {
-            updateDataTable(currentSelectedGeoID);
-        }
+        // If a metro is selected, update its table. Otherwise, update national table.
+        updateDataTable(currentSelectedGeoID || 'national');
     });
 });
