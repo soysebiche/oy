@@ -29,8 +29,10 @@ h1 {
 
 /* Controls and Filters */
 #controls {
+    display: flex;
+    justify-content: center; /* Centers items horizontally */
+    align-items: center;   /* Aligns items vertically */
     margin-bottom: 20px;
-    text-align: center;
 }
 
 .year-btn {
