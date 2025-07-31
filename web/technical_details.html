@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Details - Opportunity Youth Project</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        p, li {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Technical Details: Opportunity Youth in U.S. Metro Areas</h1>
+            <p><a href="index.html">&larr; Back to the Map</a></p>
+        </header>
+
+        <section>
+            <h2>1. Data Acquisition</h2>
+            <p>The data used in this project is sourced from <strong>IPUMS USA</strong>, specifically the American Community Survey (ACS) 1-year estimates for the years 2022 and 2023.</p>
+            <p>IPUMS (Integrated Public Use Microdata Series) provides harmonized microdata from U.S. Censuses and ACS, making it suitable for comparative analysis.</p>
+            <h3>Variables Extracted from IPUMS:</h3>
+            <ul>
+                <li><code>YEAR</code>: Survey year.</li>
+                <li><code>SAMPLE</code>: Sample identifier.</li>
+                <li><code>SERIAL</code>: Household serial number.</li>
+                <li><code>CBSERIAL</code>: CBSA serial number.</li>
+                <li><code>HHWT</code>: Household weight.</li>
+                <li><code>CLUSTER</code>: Cluster identifier.</li>
+                <li><code>REGION</code>: Region.</li>
+                <li><code>COUNTYFIP</code>: County FIPS code.</li>
+                <li><code>MET2013</code>: Metropolitan Statistical Area (MSA) code (2013 definitions).</li>
+                <li><code>STRATA</code>: Stratum.</li>
+                <li><code>GQ</code>: Group quarters status.</li>
+                <li><code>PERNUM</code>: Person number.</li>
+                <li><code>PERWT</code>: Person weight.</li>
+                <li><code>SEX</code>: Sex.</li>
+                <li><code>AGE</code>: Age.</li>
+                <li><code>RACE</code>: Race (detailed).</li>
+                <li><code>RACED</code>: Race (simplified).</li>
+                <li><code>HISPAN</code>: Hispanic origin.</li>
+                <li><code>HISPAND</code>: Hispanic origin (detailed).</li>
+                <li><code>SCHOOL</code>: School enrollment status.</li>
+                <li><code>EMPSTAT</code>: Employment status.</li>
+                <li><code>EMPSTATD</code>: Employment status (detailed).</li>
+                <li><code>LABFORCE</code>: Labor force status.</li>
+                <li><code>COUNTYICP</code>: County ICPSR code (used for specific county filtering, though not directly in metro area aggregation).</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>2. Definition of Opportunity Youth (OY)</h2>
+            <p>Following the standard definition, <strong>Opportunity Youth (OY)</strong> are defined as young people between the ages of 16 and 24 who are <strong>neither enrolled in school nor working</strong>.</p>
+            <ul>
+                <li><strong>Not in School:</strong> Corresponds to IPUMS <code>SCHOOL</code> variable value of <code>1</code> (Not in school).</li>
+                <li><strong>Not Working:</strong> Corresponds to IPUMS <code>EMPSTAT</code> variable values of <code>2</code> (Unemployed) or <code>3</code> (Not in labor force).</li>
+            </ul>
+            <p>Individuals meeting both criteria are classified as Opportunity Youth.</p>
+        </section>
+
+        <section>
+            <h2>3. Metropolitan Area (MSA) Definition</h2>
+            <p>Metropolitan areas in this project are based on the 2013 Metropolitan Statistical Area (MSA) definitions provided by IPUMS (<code>MET2013</code> variable). These correspond to the Core-Based Statistical Areas (CBSAs) as defined by the U.S. Office of Management and Budget.</p>
+            <p>Geographic boundaries for these MSAs are obtained programmatically using the <code>tigris</code> R package, which interfaces with the U.S. Census Bureau's TIGER/Line shapefiles.</p>
+        </section>
+
+        <section>
+            <h2>4. Calculation Methodology</h2>
+            <p>The data processing is performed using an R script (<code>process_data.R</code>) which executes the following steps:</p>
+            <ol>
+                <li>Loads microdata from IPUMS for both 2022 and 2023.</li>
+                <li>Filters the population to individuals aged 16-24.</li>
+                <li>Classifies each individual's OY status based on <code>SCHOOL</code> and <code>EMPSTAT</code> variables.</li>
+                <li>Aggregates the data by Metropolitan Area (<code>MET2013</code>), Year, Race/Ethnicity, and Gender, applying person weights (<code>PERWT</code>) to ensure representativeness.</li>
+                <li>Calculates the total youth population, total Opportunity Youth, and the percentage of Opportunity Youth for each MSA, year, and demographic subgroup.</li>
+                <li>Pivots the aggregated data into a wide format to facilitate year-over-year comparison in the frontend.</li>
+                <li>Downloads the geographic boundaries (shapefiles) for the MSAs using the <code>tigris</code> package.</li>
+                <li>Joins the processed OY data with the geographic boundaries.</li>
+                <li>Exports the main MSA data as a GeoJSON file (<code>metro_areas_oy.geojson</code>) for the map visualization.</li>
+                <li>Exports the detailed demographic breakdown for each MSA as a JSON file (<code>metro_detailed_data.json</code>) for the interactive table.</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>5. Frontend Implementation</h2>
+            <p>The interactive map and tables are built using standard web technologies:</p>
+            <ul>
+                <li><strong>HTML5:</strong> For structuring the content.</li>
+                <li><strong>CSS3:</strong> For styling and layout.</li>
+                <li><strong>JavaScript (ES6+):</strong> For dynamic behavior and data manipulation.</li>
+                <li><strong>Leaflet.js:</strong> An open-source JavaScript library for mobile-friendly interactive maps.</li>
+                <li><strong>D3.js:</strong> A JavaScript library for manipulating documents based on data, used here for loading data and rendering dynamic tables.</li>
+            </ul>
+        </section>
+
+        <footer>
+            <p>Made with &lt;3 by @soysebiche</p>
+        </footer>
+    </div>
+</body>
+</html>

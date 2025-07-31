@@ -1,69 +1,58 @@
-# Análisis Interactivo de Juventud Desconectada (Opportunity Youth) en Áreas Metropolitanas de EE. UU.
+# Interactive Analysis of Disconnected Youth (Opportunity Youth) in U.S. Metro Areas
 
-## Resumen del Proyecto
+## Project Overview
 
-Este proyecto tiene como objetivo crear una visualización de datos interactiva para analizar el número y porcentaje de **Juventud Desconectada (Opportunity Youth - OY)** en las principales áreas metropolitanas de Estados Unidos. La visualización se centrará en los datos de los años 2020 y 2023, permitiendo una comparación temporal.
+This project aims to create an interactive data visualization to analyze the number and percentage of **Disconnected Youth (Opportunity Youth - OY)** in major U.S. metropolitan areas. The visualization will focus on data from 2022 and 2023, allowing for temporal comparison.
 
-El proyecto se inspira en la funcionalidad y el diseño del visualizador de [Measure of America](https://www.measureofamerica.org/DYInteractive/), replicando específicamente la sección "BY METRO AREA".
+This project is inspired by the functionality and design of the [Measure of America](https://www.measureofamerica.org/DYInteractive/) visualizer, specifically replicating its "BY METRO AREA" section.
 
-La idea es utilizar datos de IPUMS (previamente descargados) y procesarlos con R o Python para generar los insumos necesarios para una visualización web.
+The goal is to use data from IPUMS (already downloaded) and process it with R to generate the necessary inputs for a web visualization.
 
-## Características Principales
+## Key Features
 
-1.  **Mapa Interactivo:** Un mapa de burbujas o coroplético de las áreas metropolitanas de EE. UU. que muestre la tasa de jóvenes desconectados.
-2.  **Tabla Desagregada:** Una tabla que muestre los datos de OY desagregados por género y raza/etnia para cada área metropolitana.
-3.  **Interactividad:** Al pasar el mouse o hacer clic en un área metropolitana, se mostrará información detallada (nombre del área, % de OY, número total de OY, y el desglose por subgrupos).
-4.  **Comparación Anual:** Funcionalidad para cambiar la visualización entre los datos de 2020 y 2023.
+1.  **Interactive Map:** A choropleth or bubble map of U.S. metropolitan areas showing the rate of disconnected youth.
+2.  **Disaggregated Table:** A table displaying OY data disaggregated by gender and race/ethnicity for each metropolitan area, with comparative data for 2022 and 2023.
+3.  **Interactivity:** Hovering or clicking on a metropolitan area will display detailed information (area name, OY %, total OY, and subgroup breakdown).
+4.  **Annual Comparison:** Functionality to switch the map visualization between 2022 and 2023 data.
+5.  **Table Filters:** Filters for gender and race/ethnicity to refine the data displayed in the detailed table.
+6.  **National Totals:** Display of national aggregate data when no specific metropolitan area is selected.
 
-## Fuente de Datos
+## Data Source
 
--   **Datos Primarios:** [IPUMS USA](https://usa.ipums.org/usa/), American Community Survey (ACS) 1-year estimates.
--   **Años:** 2020 y 2023.
--   **Población de Interés:** Jóvenes entre 16 y 24 años que no están matriculados en la escuela y no se encuentran trabajando.
+-   **Primary Data:** [IPUMS USA](https://usa.ipums.org/usa/), American Community Survey (ACS) 1-year estimates.
+-   **Years:** 2022 and 2023.
+-   **Population of Interest:** Young people aged 16 to 24 who are neither enrolled in school nor working.
 
-## Stack Tecnológico Propuesto
+## Proposed Technology Stack
 
--   **Procesamiento de Datos:**
-    -   **R:** Usando librerías como `dplyr` para manipulación, `sf` para datos espaciales.
-    -   **Python:** Usando `pandas` para manipulación y `geopandas` para datos espaciales.
-    -   El objetivo es generar archivos limpios en formato `.csv` o `.json`/`.geojson` que puedan ser consumidos fácilmente por la web.
--   **Frontend (Visualización):**
+-   **Data Processing:**
+    -   **R:** Using libraries like `dplyr` for manipulation, `sf` for spatial data, `jsonlite` for JSON export, and `tigris` for geographic data acquisition.
+    -   The objective is to generate clean data files in `.geojson` and `.json` formats that can be easily consumed by the web application.
+-   **Frontend (Visualization):**
     -   **HTML5, CSS3, JavaScript (ES6+)**
-    -   **D3.js:** Para la creación de las visualizaciones de datos (mapa de burbujas y tablas dinámicas).
-    -   **TopoJSON/GeoJSON:** Para los datos geográficos de las áreas metropolitanas.
+    -   **Leaflet.js:** For interactive mapping.
+    -   **D3.js:** For data handling and dynamic table generation.
 
-## Estructura del Proyecto (Sugerida)
+## Project Structure
 
 ```
 /
 |-- data/
-|   |-- raw/                # Datos brutos de IPUMS
-|   |-- processed/          # Datos limpios y agregados (ej. metro_data_2020.json)
+|   |-- raw/                # Raw IPUMS data (e.g., usa_00002.dat.gz, usa_00003.dat.gz)
+|   |-- processed/          # Cleaned and aggregated data (generated by R script)
 |-- processing_scripts/
-|   |-- 01_clean_data.R     # Script para limpiar y procesar los datos de IPUMS
-|-- docs/                   # Contendrá la aplicación web final
-|   |-- index.html          # Estructura principal de la página
-|   |-- style.css           # Estilos
-|   |-- main.js             # Lógica de D3.js para la visualización
-|   |-- data/               # Datos procesados listos para ser leídos por JS
-|       |-- metro_data_2020.json
-|       |-- metro_data_2023.json
-|-- README.md               # Este archivo
+|   |-- process_data.R      # R script for cleaning, processing, and aggregating IPUMS data
+|-- web/                    # Contains the final web application
+|   |-- data/               # Processed data ready for JS (metro_areas_oy.geojson, metro_detailed_data.json)
+|   |-- index.html          # Main page structure
+|   |-- style.css           # Styles
+|   |-- main.js             # D3.js and Leaflet logic for visualization
+|   |-- technical_details.html # Page with detailed technical information
+|-- .gitignore              # Specifies files to ignore in Git
+|-- README.md               # This file
+|-- vercel.json             # Vercel deployment configuration
 ```
 
-## Plan de Trabajo
+## Technical Details
 
-1.  **Procesamiento de Datos:**
-    -   Definir las variables necesarias de IPUMS (METROAREA, YEAR, AGE, SCHOOL, EMPSTAT, RACE, SEX).
-    -   Escribir un script (R o Python) para filtrar la población (16-24 años).
-    -   Calcular el estatus de "Opportunity Youth" para cada individuo.
-    -   Agregar los datos por área metropolitana, género y raza para los años 2020 y 2023.
-    -   Exportar los resultados a formato JSON.
-2.  **Desarrollo Frontend:**
-    -   Diseñar la estructura HTML base (`index.html`).
-    -   Crear la visualización del mapa de burbujas con D3.js.
-    -   Cargar los datos JSON y vincularlos a los elementos del mapa.
-    -   Implementar la interactividad (tooltips, clics).
-    -   Crear la tabla dinámica que se actualice según la selección en el mapa.
-    -   Añadir controles para cambiar entre los años 2020 y 2023.
-    -   Aplicar estilos CSS para que sea visualmente atractivo y claro.
+For an in-depth explanation of the data acquisition, definitions, and calculation methodologies, please refer to the [Technical Details page](technical_details.html).
