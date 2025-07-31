@@ -181,10 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tr>
                         <td>${row.race_ethnicity}</td>
                         <td>${row.gender}</td>
-                        <td>${p2022}%</td>
-                        <td>${p2023}%</td>
                         <td>${oy2022.toLocaleString()}</td>
+                        <td>${p2022}%</td>
                         <td>${oy2023.toLocaleString()}</td>
+                        <td>${p2023}%</td>
                         <td>${(oy2022 + oy2023).toLocaleString()}</td>
                         ${changeHtml}
                     </tr>
@@ -202,10 +202,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const footerRow = `
                 <tr>
                     <td colspan="2">Total</td>
-                    <td>${totalPercent2022}%</td>
-                    <td>${totalPercent2023}%</td>
                     <td>${totalOY2022.toLocaleString()}</td>
+                    <td>${totalPercent2022}%</td>
                     <td>${totalOY2023.toLocaleString()}</td>
+                    <td>${totalPercent2023}%</td>
                     <td>${(totalOY2022 + totalOY2023).toLocaleString()}</td>
                     ${totalChangeHtml}
                 </tr>
