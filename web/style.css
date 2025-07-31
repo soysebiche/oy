@@ -30,9 +30,14 @@ h1 {
 /* Controls and Filters */
 #controls {
     display: flex;
-    justify-content: center; /* Centers items horizontally */
+    justify-content: space-between; /* Pushes items to ends */
     align-items: center;   /* Aligns items vertically */
     margin-bottom: 20px;
+}
+
+#year-buttons-container {
+    flex-grow: 1; /* Allows this container to take available space */
+    text-align: center; /* Centers its content */
 }
 
 .year-btn {
