@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let detailedData; // Stores detailed data for all metros
     let geojsonData; // Stores geojson data for all metros
     let currentSelectedGeoID = null; // To track the currently selected metro area
-    let nationalSummary = {}; // To store calculated national totals
+    let nationalSummary = { detailed: [] }; // To store calculated national totals
 
     // Filter states
     let selectedGender = 'all';
@@ -55,14 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }).catch(error => console.error('Error loading data:', error));
 
-    // New function to calculate national summary
+    // New function to calculate national summary (only detailed breakdown)
     function calculateNationalSummary() {
-        nationalSummary = {
-            '2022': { total_youth_pop: 0, total_oy: 0, oy_percentage: 0, detailed: [] },
-            '2023': { total_youth_pop: 0, total_oy: 0, oy_percentage: 0, detailed: [] }
-        };
-
-        // Aggregate detailed data for national totals
         const nationalDetailedAggregated = {};
 
         for (const geoId in detailedData) {
@@ -75,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         youth_population_2022: 0,
                         youth_population_2023: 0,
                         total_opportunity_youth_2022: 0,
-                        total_opportunity_youth_2023: 0
+                        total_opportunity_youth_2023: 0,
                     };
                 }
                 nationalDetailedAggregated[key].youth_population_2022 += row.youth_population_2022 || 0;
@@ -85,26 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Calculate percentages for national detailed and push to nationalSummary.detailed
         for (const key in nationalDetailedAggregated) {
             const row = nationalDetailedAggregated[key];
             row.opp_youth_percent_2022 = row.youth_population_2022 > 0 ? ((row.total_opportunity_youth_2022 / row.youth_population_2022) * 100).toFixed(1) : 'N/A';
             row.opp_youth_percent_2023 = row.youth_population_2023 > 0 ? ((row.total_opportunity_youth_2023 / row.youth_population_2023) * 100).toFixed(1) : 'N/A';
             nationalSummary.detailed.push(row);
         }
-
-        // Calculate overall national totals for info panel from nationalSummary.detailed
-        nationalSummary.detailed.forEach(row => {
-            nationalSummary['2022'].total_youth_pop += row.youth_population_2022 || 0;
-            nationalSummary['2022'].total_oy += row.total_opportunity_youth_2022 || 0;
-            nationalSummary['2023'].total_youth_pop += row.youth_population_2023 || 0;
-            nationalSummary['2023'].total_oy += row.total_opportunity_youth_2023 || 0;
-        });
-
-        nationalSummary['2022'].oy_percentage = nationalSummary['2022'].total_youth_pop > 0 ? 
-            ((nationalSummary['2022'].total_oy / nationalSummary['2022'].total_youth_pop) * 100).toFixed(2) : 'N/A';
-        nationalSummary['2023'].oy_percentage = nationalSummary['2023'].total_youth_pop > 0 ?
-            ((nationalSummary['2023'].total_oy / nationalSummary['2023'].total_youth_pop) * 100).toFixed(2) : 'N/A';
     }
 
     // 5. Map Drawing and Styling Function
@@ -241,14 +221,31 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayNationalTotals() {
         currentSelectedGeoID = 'national'; // Indicate national totals are displayed
 
+        // Filter national detailed data based on current filters
+        let filteredNationalDetailed = nationalSummary.detailed.filter(row => {
+            const genderMatch = selectedGender === 'all' || row.gender === selectedGender;
+            const raceMatch = selectedRace === 'all' || row.race_ethnicity === selectedRace;
+            return genderMatch && raceMatch;
+        });
+
+        // Calculate overall totals for the info panel from the filtered data
+        let currentTotalYouthPop = 0;
+        let currentTotalOY = 0;
+
+        filteredNationalDetailed.forEach(row => {
+            currentTotalYouthPop += row[`youth_population_${selectedYear}`] || 0;
+            currentTotalOY += row[`total_opportunity_youth_${selectedYear}`] || 0;
+        });
+
+        const currentOYPercentage = currentTotalYouthPop > 0 ? ((currentTotalOY / currentTotalYouthPop) * 100).toFixed(2) : 'N/A';
+
         // Update Info Panel for National Totals
         const infoPanel = document.getElementById('info-panel');
-        const currentNationalSummary = nationalSummary[selectedYear];
         infoPanel.innerHTML = `
             <h2>National Totals (${selectedYear})</h2>
-            <p><strong>Total Youth Population:</strong> ${currentNationalSummary.total_youth_pop.toLocaleString()}</p>
-            <p><strong>Total Opportunity Youth:</strong> ${currentNationalSummary.total_oy.toLocaleString()}</p>
-            <p><strong>Opportunity Youth Percentage:</strong> ${currentNationalSummary.oy_percentage}%</p>
+            <p><strong>Total Youth Population:</strong> ${currentTotalYouthPop.toLocaleString()}</p>
+            <p><strong>Total Opportunity Youth:</strong> ${currentTotalOY.toLocaleString()}</p>
+            <p><strong>Opportunity Youth Percentage:</strong> ${currentOYPercentage}%</p>
         `;
 
         // Update Data Table for National Totals (applies filters)
