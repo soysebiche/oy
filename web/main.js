@@ -135,8 +135,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateDataTable(geoId) {
-        const tableBody = document.getElementById('data-table-body');
-        const tableFooter = document.getElementById('data-table-footer');
+        const tableBodyRate = document.getElementById('data-table-body-rate');
+        const tableFooterRate = document.getElementById('data-table-footer-rate');
+        const tableBodyShare = document.getElementById('data-table-body-share');
+        const tableFooterShare = document.getElementById('data-table-footer-share');
+        const tableBodyRate = document.getElementById('data-table-body-rate');
+        const tableFooterRate = document.getElementById('data-table-footer-rate');
+        const tableBodyShare = document.getElementById('data-table-body-share');
+        const tableFooterShare = document.getElementById('data-table-footer-share');
         let dataToDisplay = [];
 
         if (geoId === 'national') {
@@ -152,8 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return genderMatch && raceMatch;
         });
 
-        tableBody.innerHTML = '';
-        tableFooter.innerHTML = '';
+        tableBodyRate.innerHTML = '';
+        tableFooterRate.innerHTML = '';
+        tableBodyShare.innerHTML = '';
+        tableFooterShare.innerHTML = '';
 
         if (dataToDisplay && dataToDisplay.length > 0) {
             let totalOY2022 = 0;
@@ -162,22 +170,24 @@ document.addEventListener('DOMContentLoaded', () => {
             let totalPop2023 = 0;
 
             dataToDisplay.forEach(row => {
+                totalOY2022 += row.total_opportunity_youth_2022 || 0;
+                totalOY2023 += row.total_opportunity_youth_2023 || 0;
+                totalPop2022 += row.youth_population_2022 || 0;
+                totalPop2023 += row.youth_population_2023 || 0;
+            });
+
+            dataToDisplay.forEach(row => {
                 const oy2022 = row.total_opportunity_youth_2022 || 0;
                 const oy2023 = row.total_opportunity_youth_2023 || 0;
                 const pop2022 = row.youth_population_2022 || 0;
                 const pop2023 = row.youth_population_2023 || 0;
-
-                totalOY2022 += oy2022;
-                totalOY2023 += oy2023;
-                totalPop2022 += pop2022;
-                totalPop2023 += pop2023;
 
                 const p2022 = row.opp_youth_percent_2022 || 'N/A';
                 const p2023 = row.opp_youth_percent_2023 || 'N/A';
                 const change = (parseFloat(p2023) - parseFloat(p2022)).toFixed(1);
                 const changeHtml = `<td>${p2022 === 'N/A' || p2023 === 'N/A' ? 'N/A' : (change > 0 ? '▲' : '▼') + ` ${Math.abs(change)}%`}</td>`;
 
-                const tableRow = `
+                const tableRowRate = `
                     <tr>
                         <td>${row.race_ethnicity}</td>
                         <td>${row.gender}</td>
@@ -191,7 +201,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${changeHtml}
                     </tr>
                 `;
-                tableBody.innerHTML += tableRow;
+                tableBodyRate.innerHTML += tableRowRate;
+
+                const share2022 = totalOY2022 > 0 ? ((oy2022 / totalOY2022) * 100).toFixed(1) : 'N/A';
+                const share2023 = totalOY2023 > 0 ? ((oy2023 / totalOY2023) * 100).toFixed(1) : 'N/A';
+                const shareChange = (parseFloat(share2023) - parseFloat(share2022)).toFixed(1);
+                const shareChangeHtml = `<td>${share2022 === 'N/A' || share2023 === 'N/A' ? 'N/A' : (shareChange > 0 ? '▲' : '▼') + ` ${Math.abs(shareChange)}%`}</td>`;
+
+                const tableRowShare = `
+                    <tr>
+                        <td>${row.race_ethnicity}</td>
+                        <td>${row.gender}</td>
+                        <td>${oy2022.toLocaleString()}</td>
+                        <td>${share2022}%</td>
+                        <td>${oy2023.toLocaleString()}</td>
+                        <td>${share2023}%</td>
+                        ${shareChangeHtml}
+                    </tr>
+                `;
+                tableBodyShare.innerHTML += tableRowShare;
             });
 
             // Calculate totals for the footer
@@ -201,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalChangeHtml = `<td>${totalPercent2022 === 'N/A' || totalPercent2023 === 'N/A' ? 'N/A' : (totalChange > 0 ? '▲' : '▼') + ` ${Math.abs(totalChange)}%`}</td>`;
 
             // Render footer with totals
-            const footerRow = `
+            const footerRowRate = `
                 <tr>
                     <td colspan="2">Total</td>
                     <td>${totalOY2022.toLocaleString()}</td>
@@ -214,10 +242,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${totalChangeHtml}
                 </tr>
             `;
-            tableFooter.innerHTML = footerRow;
+            tableFooterRate.innerHTML = footerRowRate;
+
+            const footerRowShare = `
+                <tr>
+                    <td colspan="2">Total</td>
+                    <td>${totalOY2022.toLocaleString()}</td>
+                    <td>100%</td>
+                    <td>${totalOY2023.toLocaleString()}</td>
+                    <td>100%</td>
+                    <td>-</td>
+                </tr>
+            `;
+            tableFooterShare.innerHTML = footerRowShare;
 
         } else {
-            tableBody.innerHTML = '<tr><td colspan="10">No detailed data available for this selection.</td></tr>';
+            tableBodyRate.innerHTML = '<tr><td colspan="10">No detailed data available for this selection.</td></tr>';
+            tableBodyShare.innerHTML = '<tr><td colspan="7">No detailed data available for this selection.</td></tr>';
         }
     }
 

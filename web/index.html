@@ -60,30 +60,47 @@
 
         <div id="table-container">
             <div class="table-header-controls">
-                <h3>Detailed Breakdown</h3>
+                <h3>OY Rate by Demographic Group</h3>
+                <p>This table shows the percentage of Opportunity Youth within each specific demographic group (Race/Ethnicity and Gender). The "%OY" is calculated as: (# of OY in group / Total Youth Population in group).</p>
                 <button id="export-table-btn" class="export-btn">Export to XLSX</button>
             </div>
-            <table id="data-table">
+            <table id="data-table-rate">
                 <thead>
                     <tr>
-                        <th rowspan="2">Race/Ethnicity</th>
-                        <th rowspan="2">Gender</th>
-                        <th colspan="3">2022</th>
-                        <th colspan="3">2023</th>
-                        <th rowspan="2">Total OY (#)</th>
-                        <th rowspan="2">Change (% pts)</th>
-                    </tr>
-                    <tr>
-                        <th>OY (#)</th>
-                        <th>OY (%)</th>
-                        <th>Youth Pop</th>
-                        <th>OY (#)</th>
-                        <th>OY (%)</th>
-                        <th>Youth Pop</th>
+                        <th>Race/Ethnicity</th>
+                        <th>Gender</th>
+                        <th>#OY 2022</th>
+                        <th>%OY 2022</th>
+                        <th>Youth Pop 2022</th>
+                        <th>#OY 2023</th>
+                        <th>%OY 2023</th>
+                        <th>Youth Pop 2023</th>
+                        <th>#OY Total</th>
+                        <th>Change</th>
                     </tr>
                 </thead>
-                <tbody id="data-table-body"></tbody>
-                <tfoot id="data-table-footer"></tfoot>
+                <tbody id="data-table-body-rate"></tbody>
+                <tfoot id="data-table-footer-rate"></tfoot>
+            </table>
+
+            <div class="table-header-controls">
+                <h3>OY Share of Total OY Population</h3>
+                <p>This table shows the share of the total Opportunity Youth population that each demographic group represents. The "OY Share" is calculated as: (# of OY in group / Total # of OY across all groups).</p>
+            </div>
+            <table id="data-table-share">
+                <thead>
+                    <tr>
+                        <th>Race/Ethnicity</th>
+                        <th>Gender</th>
+                        <th>#OY 2022</th>
+                        <th>OY Share 2022</th>
+                        <th>#OY 2023</th>
+                        <th>OY Share 2023</th>
+                        <th>Change in Share</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body-share"></tbody>
+                <tfoot id="data-table-footer-share"></tfoot>
             </table>
         </div>
 
