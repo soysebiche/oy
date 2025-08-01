@@ -59,7 +59,10 @@
         </div>
 
         <div id="table-container">
-            <h3>Detailed Breakdown</h3>
+            <div class="table-header-controls">
+                <h3>Detailed Breakdown</h3>
+                <button id="export-table-btn" class="export-btn">Export to XLSX</button>
+            </div>
             <table id="data-table">
                 <thead>
                     <tr>
@@ -96,9 +99,8 @@
     <!-- Custom main script -->
     <script src="main.js"></script>
 
-    <footer>
-        <p>Made with &lt;3 by @soysebiche</p>
-    </footer>
+    <!-- SheetJS (xlsx) for Excel export -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 
 </body>
 </html>

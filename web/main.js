@@ -302,4 +302,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // If a metro is selected, update its table. Otherwise, update national table.
         updateDataTable(currentSelectedGeoID || 'national');
     });
+
+    // Event listener for Export button
+    document.getElementById('export-table-btn').addEventListener('click', () => {
+        const table = document.getElementById('data-table');
+        const ws = XLSX.utils.table_to_sheet(table);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Opportunity Youth Data");
+        XLSX.writeFile(wb, "opportunity_youth_data.xlsx");
+    });
 });
