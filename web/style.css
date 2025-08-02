@@ -165,34 +165,34 @@ h1 {
     background-color: #218838;
 }
 
-#data-table {
+.data-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
 }
 
-#data-table th, #data-table td {
+.data-table th, .data-table td {
     padding: 12px 15px;
     border-bottom: 1px solid #ddd;
     text-align: center;
 }
 
-#data-table thead th {
+.data-table thead th {
     background-color: #34495e;
     color: #ffffff;
     font-weight: bold;
     vertical-align: middle;
 }
 
-#data-table tbody tr:nth-child(even) {
+.data-table tbody tr:nth-child(even) {
     background-color: #f2f2f2;
 }
 
-#data-table tbody tr:hover {
+.data-table tbody tr:hover {
     background-color: #dbeaf5;
 }
 
-#data-table tfoot tr {
+.data-table tfoot tr {
     font-weight: bold;
     background-color: #eaf2f8;
 }
