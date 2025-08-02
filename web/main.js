@@ -139,10 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableFooterRate = document.getElementById('data-table-footer-rate');
         const tableBodyShare = document.getElementById('data-table-body-share');
         const tableFooterShare = document.getElementById('data-table-footer-share');
-        const tableBodyRate = document.getElementById('data-table-body-rate');
-        const tableFooterRate = document.getElementById('data-table-footer-rate');
-        const tableBodyShare = document.getElementById('data-table-body-share');
-        const tableFooterShare = document.getElementById('data-table-footer-share');
         let dataToDisplay = [];
 
         if (geoId === 'national') {
