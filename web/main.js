@@ -342,10 +342,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for Export button
     document.getElementById('export-table-btn').addEventListener('click', () => {
-        const table = document.getElementById('data-table');
-        const ws = XLSX.utils.table_to_sheet(table);
+        const tableRate = document.getElementById('data-table-rate');
+        const tableShare = document.getElementById('data-table-share');
+
+        const wsRate = XLSX.utils.table_to_sheet(tableRate);
+        const wsShare = XLSX.utils.table_to_sheet(tableShare);
+
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Opportunity Youth Data");
+        XLSX.utils.book_append_sheet(wb, wsRate, "OY Rate Data");
+        XLSX.utils.book_append_sheet(wb, wsShare, "OY Share Data");
+
         XLSX.writeFile(wb, "opportunity_youth_data.xlsx");
     });
 });
