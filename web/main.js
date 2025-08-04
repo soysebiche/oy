@@ -166,43 +166,34 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             dataToDisplay.forEach(row => {
-                const oy2022 = row.total_opportunity_youth_2022 || 0;
-                const oy2023 = row.total_opportunity_youth_2023 || 0;
-
-                const share2022 = totalOY2022 > 0 ? ((oy2022 / totalOY2022) * 100).toFixed(1) : 'N/A';
-                const share2023 = totalOY2023 > 0 ? ((oy2023 / totalOY2023) * 100).toFixed(1) : 'N/A';
-                const shareChange = (parseFloat(share2023) - parseFloat(share2022)).toFixed(1);
-                const shareChangeHtml = `<td>${share2022 === 'N/A' || share2023 === 'N/A' ? 'N/A' : (shareChange > 0 ? '▲' : '▼') + ` ${Math.abs(shareChange)}%`}</td>`;
+                const oy = row[`total_opportunity_youth_${selectedYear}`] || 0;
+                const totalOY = (selectedYear === 2022 ? totalOY2022 : totalOY2023);
+                const share = totalOY > 0 ? ((oy / totalOY) * 100).toFixed(1) : 'N/A';
 
                 const tableRowShare = `
                     <tr>
                         <td>${row.race_ethnicity}</td>
                         <td>${row.gender}</td>
-                        <td>${oy2022.toLocaleString()}</td>
-                        <td>${share2022}%</td>
-                        <td>${oy2023.toLocaleString()}</td>
-                        <td>${share2023}%</td>
-                        ${shareChangeHtml}
+                        <td>${oy.toLocaleString()}</td>
+                        <td>${share}%</td>
                     </tr>
                 `;
                 tableBodyShare.innerHTML += tableRowShare;
             });
 
             // Render footer with totals
+            const totalOY = (selectedYear === 2022 ? totalOY2022 : totalOY2023);
             const footerRowShare = `
                 <tr>
                     <td colspan="2">Total</td>
-                    <td>${totalOY2022.toLocaleString()}</td>
+                    <td>${totalOY.toLocaleString()}</td>
                     <td>100%</td>
-                    <td>${totalOY2023.toLocaleString()}</td>
-                    <td>100%</td>
-                    <td>-</td>
                 </tr>
             `;
             tableFooterShare.innerHTML = footerRowShare;
 
         } else {
-            tableBodyShare.innerHTML = '<tr><td colspan="7">No detailed data available for this selection.</td></tr>';
+            tableBodyShare.innerHTML = '<tr><td colspan="4">No detailed data available for this selection.</td></tr>';
         }
 
         // Update the title with the selected year
