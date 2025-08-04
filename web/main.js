@@ -135,8 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateDataTable(geoId) {
-        const tableBodyRate = document.getElementById('data-table-body-rate');
-        const tableFooterRate = document.getElementById('data-table-footer-rate');
+        const oyShareTableTitle = document.getElementById('oy-share-table-title');
         const tableBodyShare = document.getElementById('data-table-body-share');
         const tableFooterShare = document.getElementById('data-table-footer-share');
         let dataToDisplay = [];
@@ -154,50 +153,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return genderMatch && raceMatch;
         });
 
-        tableBodyRate.innerHTML = '';
-        tableFooterRate.innerHTML = '';
         tableBodyShare.innerHTML = '';
         tableFooterShare.innerHTML = '';
 
         if (dataToDisplay && dataToDisplay.length > 0) {
             let totalOY2022 = 0;
             let totalOY2023 = 0;
-            let totalPop2022 = 0;
-            let totalPop2023 = 0;
 
             dataToDisplay.forEach(row => {
                 totalOY2022 += row.total_opportunity_youth_2022 || 0;
                 totalOY2023 += row.total_opportunity_youth_2023 || 0;
-                totalPop2022 += row.youth_population_2022 || 0;
-                totalPop2023 += row.youth_population_2023 || 0;
             });
 
             dataToDisplay.forEach(row => {
                 const oy2022 = row.total_opportunity_youth_2022 || 0;
                 const oy2023 = row.total_opportunity_youth_2023 || 0;
-                const pop2022 = row.youth_population_2022 || 0;
-                const pop2023 = row.youth_population_2023 || 0;
-
-                const p2022 = row.opp_youth_percent_2022 || 'N/A';
-                const p2023 = row.opp_youth_percent_2023 || 'N/A';
-                const change = (parseFloat(p2023) - parseFloat(p2022)).toFixed(1);
-                const changeHtml = `<td>${p2022 === 'N/A' || p2023 === 'N/A' ? 'N/A' : (change > 0 ? '▲' : '▼') + ` ${Math.abs(change)}%`}</td>`;
-
-                const tableRowRate = `
-                    <tr>
-                        <td>${row.race_ethnicity}</td>
-                        <td>${row.gender}</td>
-                        <td>${oy2022.toLocaleString()}</td>
-                        <td>${p2022}%</td>
-                        <td>${pop2022.toLocaleString()}</td>
-                        <td>${oy2023.toLocaleString()}</td>
-                        <td>${p2023}%</td>
-                        <td>${pop2023.toLocaleString()}</td>
-                        <td>${(oy2022 + oy2023).toLocaleString()}</td>
-                        ${changeHtml}
-                    </tr>
-                `;
-                tableBodyRate.innerHTML += tableRowRate;
 
                 const share2022 = totalOY2022 > 0 ? ((oy2022 / totalOY2022) * 100).toFixed(1) : 'N/A';
                 const share2023 = totalOY2023 > 0 ? ((oy2023 / totalOY2023) * 100).toFixed(1) : 'N/A';
@@ -218,28 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tableBodyShare.innerHTML += tableRowShare;
             });
 
-            // Calculate totals for the footer
-            const totalPercent2022 = totalPop2022 > 0 ? ((totalOY2022 / totalPop2022) * 100).toFixed(1) : 'N/A';
-            const totalPercent2023 = totalPop2023 > 0 ? ((totalOY2023 / totalPop2023) * 100).toFixed(1) : 'N/A';
-            const totalChange = (parseFloat(totalPercent2023) - parseFloat(totalPercent2022)).toFixed(1);
-            const totalChangeHtml = `<td>${totalPercent2022 === 'N/A' || totalPercent2023 === 'N/A' ? 'N/A' : (totalChange > 0 ? '▲' : '▼') + ` ${Math.abs(totalChange)}%`}</td>`;
-
             // Render footer with totals
-            const footerRowRate = `
-                <tr>
-                    <td colspan="2">Total</td>
-                    <td>${totalOY2022.toLocaleString()}</td>
-                    <td>${totalPercent2022}%</td>
-                    <td>${totalPop2022.toLocaleString()}</td>
-                    <td>${totalOY2023.toLocaleString()}</td>
-                    <td>${totalPercent2023}%</td>
-                    <td>${totalPop2023.toLocaleString()}</td>
-                    <td>${(totalOY2022 + totalOY2023).toLocaleString()}</td>
-                    ${totalChangeHtml}
-                </tr>
-            `;
-            tableFooterRate.innerHTML = footerRowRate;
-
             const footerRowShare = `
                 <tr>
                     <td colspan="2">Total</td>
@@ -253,9 +202,11 @@ document.addEventListener('DOMContentLoaded', () => {
             tableFooterShare.innerHTML = footerRowShare;
 
         } else {
-            tableBodyRate.innerHTML = '<tr><td colspan="10">No detailed data available for this selection.</td></tr>';
             tableBodyShare.innerHTML = '<tr><td colspan="7">No detailed data available for this selection.</td></tr>';
         }
+
+        // Update the title with the selected year
+        oyShareTableTitle.textContent = `OY Share of Total OY Population (${selectedYear})`;
     }
 
     // New function to display national totals
@@ -342,14 +293,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for Export button
     document.getElementById('export-table-btn').addEventListener('click', () => {
-        const tableRate = document.getElementById('data-table-rate');
         const tableShare = document.getElementById('data-table-share');
 
-        const wsRate = XLSX.utils.table_to_sheet(tableRate);
         const wsShare = XLSX.utils.table_to_sheet(tableShare);
 
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, wsRate, "OY Rate Data");
         XLSX.utils.book_append_sheet(wb, wsShare, "OY Share Data");
 
         XLSX.writeFile(wb, "opportunity_youth_data.xlsx");
